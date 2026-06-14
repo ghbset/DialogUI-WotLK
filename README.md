@@ -12,6 +12,18 @@ This is a **3.3.5a port** of [Sxus's DialogUI](https://github.com/Jslquintero/Di
 
 ---
 
+## Screenshots
+
+| Light mode | Dark mode |
+|:---:|:---:|
+| ![Light mode](docs/light-mode.png) | ![Dark mode](docs/dark-mode.png) |
+
+**Book mode** (immersive reader with focus dimmer)
+
+![Book mode](docs/book-mode.png)
+
+---
+
 Disclaimer:
 This addon was created primarily as a learning project to explore WoW addon development.
 It is provided as-is, without warranty or support.
