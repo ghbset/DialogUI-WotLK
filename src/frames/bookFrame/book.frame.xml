@@ -1,0 +1,162 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+    <Script file="src\frames\bookFrame\book.frame.lua" />
+
+    <!-- Full-screen dimmer behind the book: focuses attention on the page and
+         absorbs clicks (clicking it closes the book), like the modern reader. -->
+    <Frame name="DBookBackdrop" parent="UIParent" enableMouse="true" hidden="true"
+        frameStrata="FULLSCREEN">
+        <Anchors>
+            <Anchor point="TOPLEFT" relativeTo="UIParent" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="UIParent" />
+        </Anchors>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture setAllPoints="true">
+                    <Color r="0" g="0" b="0" a="0.5" />
+                </Texture>
+            </Layer>
+        </Layers>
+        <Scripts>
+            <OnMouseUp>
+                if (DBookFrame and DBookFrame:IsShown()) then DBookFrame:Hide(); end
+            </OnMouseUp>
+        </Scripts>
+    </Frame>
+
+    <!-- The book itself: a centered, bound parchment leaf. -->
+    <Frame name="DBookFrame" parent="UIParent" enableMouse="true" hidden="true"
+        frameStrata="FULLSCREEN_DIALOG">
+        <Size>
+            <AbsDimension x="512" y="512" />
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER" relativeTo="UIParent">
+                <Offset>
+                    <AbsDimension x="0" y="20" />
+                </Offset>
+            </Anchor>
+        </Anchors>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture name="DBookPageTexture"
+                    file="Interface\AddOns\DialogUI\src\assets\art\parchment\BookPage">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" />
+                        <Anchor point="BOTTOMRIGHT" />
+                    </Anchors>
+                </Texture>
+            </Layer>
+            <Layer level="ARTWORK">
+                <!-- Book title, centered (no avatar icon). -->
+                <FontString name="DBookTitle" inherits="DQuestTitleFont" justifyH="CENTER">
+                    <Size>
+                        <AbsDimension x="400" y="40" />
+                    </Size>
+                    <Anchors>
+                        <Anchor point="TOP" relativeTo="DBookFrame" relativePoint="TOP">
+                            <Offset>
+                                <AbsDimension x="0" y="-54" />
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+                <FontString name="DBookPageNumber" inherits="DQuestFont" justifyH="CENTER">
+                    <Anchors>
+                        <Anchor point="BOTTOM" relativeTo="DBookFrame" relativePoint="BOTTOM">
+                            <Offset>
+                                <AbsDimension x="0" y="94" />
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+            <ScrollFrame name="DBookScrollFrame" inherits="DUIPanelScrollFrameTemplate">
+                <Size>
+                    <AbsDimension x="380" y="300" />
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="DBookFrame">
+                        <Offset>
+                            <AbsDimension x="58" y="-108" />
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <ScrollChild>
+                    <Frame name="DBookScrollChildFrame">
+                        <Size>
+                            <AbsDimension x="380" y="300" />
+                        </Size>
+                        <Layers>
+                            <Layer level="ARTWORK">
+                                <FontString name="DBookPageText" inherits="DQuestFont"
+                                    justifyH="LEFT">
+                                    <Size>
+                                        <AbsDimension x="368" y="0" />
+                                    </Size>
+                                    <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                            <Offset>
+                                                <AbsDimension x="6" y="-6" />
+                                            </Offset>
+                                        </Anchor>
+                                    </Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                    </Frame>
+                </ScrollChild>
+            </ScrollFrame>
+            <Button name="DBookPrevButton" inherits="DUIPanelButtonTemplate" text="Previous">
+                <Size>
+                    <AbsDimension x="130" y="32" />
+                </Size>
+                <Anchors>
+                    <Anchor point="BOTTOMLEFT" relativeTo="DBookFrame" relativePoint="BOTTOMLEFT">
+                        <Offset>
+                            <AbsDimension x="60" y="56" />
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        DBookPrevButton_OnClick();
+                    </OnClick>
+                </Scripts>
+            </Button>
+            <Button name="DBookNextButton" inherits="DUIPanelButtonTemplate" text="Next Page">
+                <Size>
+                    <AbsDimension x="130" y="32" />
+                </Size>
+                <Anchors>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="DBookFrame" relativePoint="BOTTOMRIGHT">
+                        <Offset>
+                            <AbsDimension x="-60" y="56" />
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        DBookNextButton_OnClick();
+                    </OnClick>
+                </Scripts>
+            </Button>
+        </Frames>
+        <Scripts>
+            <OnLoad>
+                DBookFrame_OnLoad();
+            </OnLoad>
+            <OnEvent>
+                DBookFrame_OnEvent(event);
+            </OnEvent>
+            <OnShow>
+                DBookFrame_OnShow();
+            </OnShow>
+            <OnHide>
+                DBookFrame_OnHide();
+            </OnHide>
+        </Scripts>
+    </Frame>
+</Ui>

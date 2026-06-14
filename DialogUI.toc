@@ -1,0 +1,55 @@
+## Interface: 30300
+## Title: DialogUI
+## Author: Sxus (original) & Bset (WotLK 3.3.5a port)
+## Version: 1.0.2
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## SavedVariables: DialogUISettings
+## Notes: Addon made for an immersive questing experience, ported to WotLK 3.3.5a. Consider it a Vanilla+ frame.
+
+# Fonts used for the frames
+src\assets\font\fonts.xml
+
+# Keybindings
+src\bindings.lua
+
+
+# Money frame
+src\frames\moneyFrame\money.frame.lua
+src\frames\moneyFrame\money.frame.xml
+
+
+# UI panel textures
+src\frames\uiPanelTemplate\ui.panel.template.lua
+src\frames\uiPanelTemplate\ui.panel.template.xml
+src\frames\uiPanelTemplate\ui.panel.template.button.xml
+
+
+
+# Gossip frame
+src\frames\gossipFrame\gossip.frame.lua
+src\frames\gossipFrame\gossip.frame.xml
+
+# Quest frame
+src\frames\questFrame\quest.frame.lua
+src\frames\questFrame\quest.frame.template.xml
+src\frames\questFrame\quest.frame.xml
+
+# Book frame (immersive readable items/books/letters)
+src\frames\bookFrame\book.frame.lua
+src\frames\bookFrame\book.frame.xml
+
+# Config (font size/face, frame scale/side, text animation)
+src\config.lua
+
+# Auto-advance single options / turn-ins (optional)
+src\auto.lua
+
+# Focus mode (book-style dimmer + center for quest/gossip)
+src\focus.lua
+
+# Theme (light/dark mode)
+src\theme.lua
+
+# Options panel — loaded last (references theme + config)
+src\settings.lua

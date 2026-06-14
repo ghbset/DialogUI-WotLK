@@ -1,0 +1,24 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+    <!-- Textures  -->
+    <Texture name="DUIPanelButtonUpTexture" file="Interface\AddOns\DialogUI\src\assets\art\parchment\OptionBackground-Common" virtual="true">
+    </Texture>
+    <Texture name="DUIPanelButtonDownTexture" file="Interface\AddOns\DialogUI\src\assets\art\parchment\ButtonHighlight-Gossip" virtual="true">
+    </Texture>
+    <Texture name="DUIPanelButtonDisabledTexture" file="Interface\AddOns\DialogUI\src\assets\art\parchment\OptionBackground-Grey"  virtual="true">
+    </Texture>
+    <Texture name="DUIPanelButtonDisabledDownTexture" file="Interface\AddOns\DialogUI\src\assets\art\parchment\OptionBackground-Grey"  virtual="true">
+    </Texture>
+    <Texture name="DUIPanelButtonHighlightTexture" file="Interface\AddOns\DialogUI\src\assets\art\parchment\ButtonHighlight-Gossip" alphaMode="ADD" virtual="true">
+    </Texture>
+    <!-- Textures End -->
+    <Button name="DUIPanelButtonTemplate" virtual="true">
+        <ButtonText name="$parentText"/>
+        <NormalFont inherits="DGameFontNormal"/>
+        <HighlightFont inherits="DGameFontHighlight"/>
+        <DisabledFont inherits="GameFontDisable"/>
+        <NormalTexture inherits="DUIPanelButtonUpTexture"/>
+        <DisabledTexture inherits="DUIPanelButtonDisabledTexture"/>
+        <HighlightTexture inherits="DUIPanelButtonHighlightTexture"/>
+    </Button>
+</Ui>

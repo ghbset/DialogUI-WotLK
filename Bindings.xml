@@ -1,0 +1,17 @@
+<Bindings>
+    <Binding name="DIALOGUI_ACCEPT_OR_COMPLETE" header="DIALOGUI" key1="SPACE">
+        DialogUI_AcceptOrComplete();
+    </Binding>
+    <Binding name="DIALOGUI_DECLINE_OR_CANCEL" key1="ESCAPE">
+        DialogUI_DeclineOrCancel();
+    </Binding>
+    <Binding name="DIALOGUI_GOSSIP_OPTION_1">DialogUI_GossipOption(1)</Binding>
+    <Binding name="DIALOGUI_GOSSIP_OPTION_2">DialogUI_GossipOption(2)</Binding>
+    <Binding name="DIALOGUI_GOSSIP_OPTION_3">DialogUI_GossipOption(3)</Binding>
+    <Binding name="DIALOGUI_GOSSIP_OPTION_4">DialogUI_GossipOption(4)</Binding>
+    <Binding name="DIALOGUI_GOSSIP_OPTION_5">DialogUI_GossipOption(5)</Binding>
+    <Binding name="DIALOGUI_GOSSIP_OPTION_6">DialogUI_GossipOption(6)</Binding>
+    <Binding name="DIALOGUI_GOSSIP_OPTION_7">DialogUI_GossipOption(7)</Binding>
+    <Binding name="DIALOGUI_GOSSIP_OPTION_8">DialogUI_GossipOption(8)</Binding>
+    <Binding name="DIALOGUI_GOSSIP_OPTION_9">DialogUI_GossipOption(9)</Binding>
+</Bindings>
