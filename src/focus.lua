@@ -55,8 +55,14 @@ end
 -- Called from a dialog's OnShow.
 function DialogUI_Focus:OnShow(frame)
     self:PlaceFrame(frame);
-    if (self:IsOn()) then
-        UIFrameFadeRemoveFrame(backdrop);
+    if (not self:IsOn()) then return; end
+    -- Cancel any in-flight fade (e.g. a fade-OUT that the previous frame's OnHide
+    -- just started during a gossip->quest hand-off).
+    UIFrameFadeRemoveFrame(backdrop);
+    if (backdrop:IsShown() and backdrop:GetAlpha() > 0) then
+        -- Already dimmed (or part-way) — snap to full so we never re-fade from black.
+        backdrop:SetAlpha(1);
+    else
         backdrop:Show();
         backdrop:SetAlpha(0);
         UIFrameFadeIn(backdrop, FADE, 0, 1);
