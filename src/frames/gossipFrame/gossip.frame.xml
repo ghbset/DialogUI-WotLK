@@ -186,7 +186,7 @@
                         </Layers>
                         <Scripts>
                             <OnClick>
-                                HideUIPanel(GossipFrame);
+                                HideUIPanel(DGossipFrame);
                             </OnClick>
                         </Scripts>
                     </Button>
