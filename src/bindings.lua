@@ -119,14 +119,28 @@ local function DialogUI_SetButtonKeyText(buttonName, command, defaultKey)
         icon:Hide();
     end
 
+    -- The key chip is INK on parchment, not a black box. It used to be SetTexture(0,0,0)
+    -- at 0.9 alpha with a border that was ALSO pure black and drawn ON TOP of the fill,
+    -- so the pair rendered as one solid black slab on a cream page (issue #4).
+    --
+    -- GetColor("DarkBrown") is the PROSE colour, which the theme deliberately inverts to a
+    -- light ivory in dark mode so text stays legible on the dark page. That makes it the
+    -- right pick for the chip FILL — it contrasts with the page in both modes — but it
+    -- also means the label has to invert the other way, or dark mode would be light text
+    -- on a light chip.
+    local INK = {0.19, 0.17, 0.13};
+    local dark = (DialogUI_Theme and DialogUI_Theme.GetMode and DialogUI_Theme:GetMode() == "dark");
+    local ink = (DialogUI_Theme and DialogUI_Theme.GetColor and DialogUI_Theme:GetColor("DarkBrown"))
+                or INK;
+
     local keyBackground = getglobal(buttonName .. "KeyBackground");
     if (not keyBackground) then
         keyBackground = button:CreateTexture(buttonName .. "KeyBackground", "ARTWORK");
         keyBackground:SetPoint("LEFT", button, "LEFT", 8, 0);
         keyBackground:SetHeight(22);
     end
-    keyBackground:SetTexture(0, 0, 0);
-    keyBackground:SetAlpha(0.90);
+    keyBackground:SetTexture(ink[1], ink[2], ink[3]);
+    keyBackground:SetAlpha(dark and 0.75 or 0.55);
 
     local keyBorder = getglobal(buttonName .. "KeyBorder");
     if (not keyBorder) then
@@ -134,7 +148,12 @@ local function DialogUI_SetButtonKeyText(buttonName, command, defaultKey)
         keyBorder:SetPoint("CENTER", keyBackground, "CENTER", 0, 0);
         keyBorder:SetHeight(24);
     end
-    keyBorder:SetTexture(0, 0, 0);
+    -- The border is 2px larger than the fill, so it only reads as an EDGE if it sits
+    -- behind it. It was created on OVERLAY (above), which meant it covered the fill
+    -- completely and the two textures rendered as one flat slab. SetDrawLayer fixes
+    -- existing chips as well as new ones.
+    keyBorder:SetDrawLayer("BACKGROUND");
+    keyBorder:SetTexture(ink[1], ink[2], ink[3]);
     keyBorder:SetAlpha(1.0);
 
     local keyText = getglobal(buttonName .. "KeyText");
@@ -144,7 +163,12 @@ local function DialogUI_SetButtonKeyText(buttonName, command, defaultKey)
         keyText:SetPoint("RIGHT", keyBackground, "RIGHT", -4, 0);
         keyText:SetJustifyH("CENTER");
     end
-    keyText:SetTextColor(1.0, 1.0, 1.0);
+    -- Inverse of the chip: light text on the dark light-mode chip, dark text on the light
+    -- dark-mode one.
+    local label = dark and INK
+                  or ((DialogUI_Theme and DialogUI_Theme.GetColor and DialogUI_Theme:GetColor("Ivory"))
+                      or {0.87, 0.86, 0.75});
+    keyText:SetTextColor(label[1], label[2], label[3]);
 
     local bindingText = DialogUI_GetBindingDisplayText(command, defaultKey);
     local keyWidth = string.len(bindingText) * 7 + 14;

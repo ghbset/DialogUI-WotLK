@@ -285,7 +285,7 @@ function DQuestFrame_OnEvent(event)
 end
 
 function DQuestFrame_SetPortrait()
-    DQuestFrameNpcNameText:SetText(UnitName("npc"));
+    DialogUI_Config:SetHeaderText(DQuestFrameNpcNameText, UnitName("npc"));
     if (UnitExists("npc")) then
         -- Plain SetPortraitTexture renders a CIRCULAR portrait on 3.3.5a (head on a
         -- circular field with transparent corners). No mask/texcoord needed.
@@ -300,7 +300,7 @@ function DQuestFrameRewardPanel_OnShow()
     DQuestFrameGreetingPanel:Hide();
     DQuestFrameProgressPanel:Hide();
     HideDefaultFrames();
-    DQuestFrameNpcNameText:SetText(GetTitleText());
+    DialogUI_Config:SetHeaderText(DQuestFrameNpcNameText, GetTitleText());
     DQuestRewardText:SetText(GetRewardText());
     SetFontColor(DQuestFrameNpcNameText, "DarkBrown");
     SetFontColor(DQuestRewardTitleText, "DarkBrown");
@@ -403,7 +403,7 @@ function DQuestFrameProgressPanel_OnShow()
     DQuestFrameDetailPanel:Hide();
     DQuestFrameGreetingPanel:Hide();
     HideDefaultFrames();
-    DQuestFrameNpcNameText:SetText(GetTitleText());
+    DialogUI_Config:SetHeaderText(DQuestFrameNpcNameText, GetTitleText());
     DQuestProgressText:SetText(GetProgressText());
     SetFontColor(DQuestFrameNpcNameText, "DarkBrown");
     SetFontColor(DQuestProgressText, "DarkBrown");
@@ -654,6 +654,16 @@ end
 
 function DQuestFrame_OnHide()
     DQuestFrame_ClearKeys();
+    -- Drop the auto-accept state and restore Decline for the next quest, and close a
+    -- PvP confirmation still hanging around (stock QuestFrame_OnHide does both).
+    if (DQuestFrame.dialog) then
+        DQuestFrame.dialog:Hide();
+        DQuestFrame.dialog = nil;
+    end
+    if (DQuestFrame.autoQuest) then
+        DQuestFrameDeclineButton:Show();
+        DQuestFrame.autoQuest = nil;
+    end
     DQuestFrameGreetingPanel:Hide();
     DQuestFrameDetailPanel:Hide();
     DQuestFrameRewardPanel:Hide();
@@ -908,7 +918,7 @@ function DQuestFrameDetailPanel_OnShow()
     DQuestFrameProgressPanel:Hide();
     DQuestFrameGreetingPanel:Hide();
     HideDefaultFrames();
-    DQuestFrameNpcNameText:SetText(GetTitleText());
+    DialogUI_Config:SetHeaderText(DQuestFrameNpcNameText, GetTitleText());
     DQuestDescription:SetText(GetQuestText());
     DQuestObjectiveText:SetText(GetObjectiveText());
     SetFontColor(DQuestFrameNpcNameText, "DarkBrown");
@@ -922,6 +932,18 @@ function DQuestFrameDetailPanel_OnShow()
     -- Hide Objectives and rewards until the text is completely displayed
     DTextAlphaDependentFrame:SetAlpha(0);
     DQuestFrameAcceptButton:Disable();
+
+    -- An AUTO-ACCEPTED quest is already in the log by the time this panel opens, so
+    -- there is nothing left to accept and no offer to decline. Stock QuestFrame.lua
+    -- flags it and hides Decline here; we do the same, and DQuestDetailAcceptButton_OnClick
+    -- turns the remaining button into a plain close. Without this the button called
+    -- AcceptQuest() on a quest the player already had, which is issue #5.
+    DQuestFrame.autoQuest = (QuestGetAutoAccept and QuestGetAutoAccept()) and true or nil;
+    if (DQuestFrame.autoQuest) then
+        DQuestFrameDeclineButton:Hide();
+    else
+        DQuestFrameDeclineButton:Show();
+    end
 
     -- Accept/decline only; single-quest detail has no numbered selection.
     DQuestFrame_SetKeys(nil, 0);
@@ -956,10 +978,26 @@ function DQuestDetailAcceptButton_OnClick()
         return;
     end
 
-    AcceptQuest();
+    -- Mirrors stock QuestDetailAcceptButton_OnClick. A PvP quest confirms first, and an
+    -- auto-accepted one is ALREADY in the log — accepting it again is what could take the
+    -- client down (issue #5), so the button just closes the window like stock does.
+    if (QuestFlagsPVP and QuestFlagsPVP()) then
+        DQuestFrame.dialog = StaticPopup_Show("CONFIRM_ACCEPT_PVP_QUEST");
+    elseif (DQuestFrame.autoQuest) then
+        HideUIPanel(DQuestFrame);
+    else
+        AcceptQuest();
+    end
 end
 
 function DQuestDetailDeclineButton_OnClick()
+    -- The button is hidden for an auto-accepted quest, but the decline KEYBIND still
+    -- routes here, and declining a quest already in the log is the same bad call the
+    -- accept path made (issue #5). Close instead.
+    if (DQuestFrame.autoQuest) then
+        HideUIPanel(DQuestFrame);
+        return;
+    end
     DeclineQuest();
     PlaySound("igQuestCancel");
 end

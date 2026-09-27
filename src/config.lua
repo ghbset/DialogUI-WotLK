@@ -53,6 +53,46 @@ local function S(key)
 end
 DialogUI_Config.Get = function(_, key) return S(key); end
 
+-- Header names (the NPC / quest title over the divider) must not grow back under the
+-- portrait ring, so the box is anchored clear of it and anything still too wide is
+-- trimmed to one line with an ellipsis rather than wrapping into the divider below.
+--
+-- Width is measured on a throwaway FontString with NO width set: a width-constrained
+-- FontString wraps, and what GetStringWidth reports for a wrapped string is not
+-- something to build a layout on. Unconstrained, it is simply the natural pixel width.
+local measure;
+function DialogUI_Config:SetHeaderText(fs, text)
+    if (not fs) then return; end
+    text = text or "";
+    local maxW = fs:GetWidth() or 0;
+    if (maxW <= 0) then
+        fs:SetText(text);
+        return;
+    end
+    if (not measure) then
+        measure = UIParent:CreateFontString(nil, "ARTWORK");
+        measure:Hide();
+    end
+    -- Match the live font, so the measurement tracks the user's font face/size setting.
+    local file, size, flags = fs:GetFont();
+    if (file) then measure:SetFont(file, size, flags); end
+    measure:SetText(text);
+    if ((measure:GetStringWidth() or 0) <= maxW) then
+        fs:SetText(text);
+        return;
+    end
+    -- Trim from the end until the name plus an ellipsis fits.
+    local trimmed = text;
+    while (string.len(trimmed) > 1) do
+        trimmed = string.sub(trimmed, 1, string.len(trimmed) - 1);
+        measure:SetText(trimmed .. "...");
+        if ((measure:GetStringWidth() or 0) <= maxW) then
+            break;
+        end
+    end
+    fs:SetText(trimmed .. "...");
+end
+
 -- Re-run whichever of our frames is visible so new font/scale metrics lay out.
 function DialogUI_Config:RefreshVisible()
     if (DQuestFrame and DQuestFrame:IsVisible()) then
@@ -86,11 +126,62 @@ function DialogUI_Config:ApplyScale()
     end
 end
 
+-- Join the stock UI panel system, so opening a dialog PUSHES the character sheet (and
+-- friends) aside instead of landing on top of them (issue #2). ShowUIPanel only lays a
+-- frame out if it has a UIPanelWindows entry — without one it degrades to frame:Show(),
+-- which is why these windows overlapped everything. The entry mirrors what the frames we
+-- replace use: stock QuestFrame and GossipFrame are both { area = "left", pushable = 0 },
+-- and CharacterFrame is pushable = 3, so it is the one that moves.
+--
+-- The left/right preference maps straight onto the panel areas. Focus mode is the
+-- exception: it centres the window over a dimmer, so there we deregister and go back to
+-- placing the frame ourselves.
+-- A frame must not sit in UISpecialFrames AND UIPanelWindows at once. ESC reaches both,
+-- but CloseSpecialWindows closes with a bare frame:Hide(), which skips the panel system's
+-- bookkeeping and leaves UIParent holding a slot it thinks is still occupied. While we are
+-- docked, the panel path (CloseWindows -> HideUIPanel) already handles ESC, so drop out of
+-- the special list; in focus mode we are not a panel and need it back.
+local function SetSpecialFrame(name, wanted)
+    if (not UISpecialFrames) then return; end
+    for i = table.getn(UISpecialFrames), 1, -1 do
+        if (UISpecialFrames[i] == name) then
+            table.remove(UISpecialFrames, i);
+        end
+    end
+    if (wanted) then
+        table.insert(UISpecialFrames, name);
+    end
+end
+
+function DialogUI_Config:ApplyPanelDocking()
+    if (not UIPanelWindows) then return; end
+    local focus = (DialogUI_Focus and DialogUI_Focus.IsOn and DialogUI_Focus:IsOn()) and true or false;
+    local area = (S("frameSide") == "RIGHT") and "right" or "left";
+    for _, name in ipairs(ORIENT_FRAMES) do
+        local want = (not focus) and area or nil;
+        local cur = UIPanelWindows[name] and UIPanelWindows[name].area or nil;
+        -- Only rewrite on an actual change: swapping the entry out from under a frame the
+        -- panel system currently has docked would leave UIParent holding a slot it can no
+        -- longer release.
+        if (want ~= cur) then
+            if (want) then
+                UIPanelWindows[name] = { area = want, pushable = 0 };
+            else
+                UIPanelWindows[name] = nil;
+            end
+        end
+        SetSpecialFrame(name, want == nil);
+    end
+end
+
 function DialogUI_Config:ApplyOrientation()
+    self:ApplyPanelDocking();
+    -- Docked to the panel system => UIParent owns the position; anchoring it here would
+    -- just fight that. Only place the frame ourselves when we are NOT registered.
     local side = S("frameSide") or "LEFT";
     for _, name in ipairs(ORIENT_FRAMES) do
         local fr = getglobal(name);
-        if (fr) then
+        if (fr and not (UIPanelWindows and UIPanelWindows[name])) then
             fr:ClearAllPoints();
             if (side == "RIGHT") then
                 fr:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, -104);

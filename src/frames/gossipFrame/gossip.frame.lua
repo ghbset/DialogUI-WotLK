@@ -178,7 +178,7 @@ function DGossipFrameUpdate()
     for i = DGossipFrame.buttonIndex, NUMGOSSIPBUTTONS do
         getglobal("DGossipTitleButton" .. i):Hide();
     end
-    DGossipFrameNpcNameText:SetText(UnitName("npc"));
+    DialogUI_Config:SetHeaderText(DGossipFrameNpcNameText, UnitName("npc"));
     if (UnitExists("npc")) then
         -- Plain SetPortraitTexture renders a CIRCULAR portrait on 3.3.5a.
         SetPortraitTexture(DGossipFramePortrait, "npc");

@@ -35,20 +35,28 @@ end
 -- Position a frame: centered (focus mode) or docked to its configured side.
 function DialogUI_Focus:PlaceFrame(frame)
     if (not frame) then return; end
-    frame:ClearAllPoints();
     if (self:IsOn()) then
+        frame:ClearAllPoints();
         frame:SetFrameStrata("FULLSCREEN_DIALOG");   -- above the dimmer
         -- The parchment overhangs the 384-wide frame by 128 on the right, so nudge
         -- left 64 to center the visible page.
         frame:SetPoint("CENTER", UIParent, "CENTER", -64, 20);
+        return;
+    end
+    frame:SetFrameStrata("DIALOG");
+    -- Docked in the panel system (issue #2): UIParent has already positioned it, and it
+    -- is the panel system that pushes the character sheet out of the way. Re-anchoring
+    -- here would undo the layout it just did.
+    local name = frame.GetName and frame:GetName();
+    if (name and UIPanelWindows and UIPanelWindows[name]) then
+        return;
+    end
+    frame:ClearAllPoints();
+    local side = (DialogUISettings and DialogUISettings.frameSide) or "LEFT";
+    if (side == "RIGHT") then
+        frame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, -104);
     else
-        frame:SetFrameStrata("DIALOG");
-        local side = (DialogUISettings and DialogUISettings.frameSide) or "LEFT";
-        if (side == "RIGHT") then
-            frame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, -104);
-        else
-            frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, -104);
-        end
+        frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, -104);
     end
 end
 
@@ -86,6 +94,11 @@ end
 -- Re-apply when the setting is toggled from the options panel: reposition any open
 -- dialog and show/hide the dimmer to match.
 function DialogUI_Focus:Apply()
+    -- Focus mode decides whether the dialogs are docked panels or free-floating, so the
+    -- registration has to follow the toggle.
+    if (DialogUI_Config and DialogUI_Config.ApplyPanelDocking) then
+        DialogUI_Config:ApplyPanelDocking();
+    end
     if (DQuestFrame and DQuestFrame:IsVisible()) then self:PlaceFrame(DQuestFrame); end
     if (DGossipFrame and DGossipFrame:IsVisible()) then self:PlaceFrame(DGossipFrame); end
     if (self:IsOn()) then

@@ -52,12 +52,19 @@
                              this elevated (+2) frame so it draws above the parchment. -->
                         <FontString name="DQuestFrameNpcNameText" inherits="DQuestTitleFont" text="Title Text" justifyH="CENTER">
                             <Size>
-                                <AbsDimension x="340" y="0"/>
+                                <AbsDimension x="266" y="0"/>
                             </Size>
                             <Anchors>
-                                <Anchor point="TOP" relativeTo="DQuestFrame" relativePoint="TOP">
+                                <!-- Starts clear of the portrait RING, not the portrait. The ring is
+                                     124 wide centred on a 59px portrait, so it reaches x=150 in frame
+                                     space while this text box used to start at x=82 — a long name grew
+                                     leftwards out of its centre and vanished under the ring, which
+                                     draws on OVERLAY above it (issue #3). 156 leaves a small gap; the
+                                     266 width carries it to the same right edge as before. Names that
+                                     still do not fit are trimmed by DialogUI_Config:SetHeaderText. -->
+                                <Anchor point="TOPLEFT" relativeTo="DQuestFrame" relativePoint="TOPLEFT">
                                     <Offset>
-                                        <AbsDimension x="60" y="-42" />
+                                        <AbsDimension x="156" y="-42" />
                                     </Offset>
                                 </Anchor>
                             </Anchors>

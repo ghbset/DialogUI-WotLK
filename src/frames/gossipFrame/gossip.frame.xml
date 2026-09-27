@@ -96,12 +96,14 @@
                         <!-- NPC name centered over the divider. -->
                         <FontString name="DGossipFrameNpcNameText" inherits="DQuestTitleFont" justifyH="CENTER">
                             <Size>
-                                <AbsDimension x="340" y="20"/>
+                                <AbsDimension x="266" y="20"/>
                             </Size>
                             <Anchors>
-                                <Anchor point="TOP" relativeTo="DGossipFrame" relativePoint="TOP">
+                                <!-- Clear of the portrait ring — see the matching note in
+                                     quest.frame.xml (issue #3). -->
+                                <Anchor point="TOPLEFT" relativeTo="DGossipFrame" relativePoint="TOPLEFT">
                                     <Offset>
-                                        <AbsDimension x="60" y="-42" />
+                                        <AbsDimension x="156" y="-42" />
                                     </Offset>
                                 </Anchor>
                             </Anchors>

@@ -151,6 +151,11 @@ end
 function DialogUI_Theme:Apply()
     self:ApplyParchment();
     self:ApplyAccents();
+    -- The keybind chips take their colour from this theme (see bindings.lua), and the
+    -- panel refreshes below don't touch them, so repaint them here on a mode switch.
+    if (DialogUI_UpdateKeyBindingLabels) then
+        DialogUI_UpdateKeyBindingLabels();
+    end
 
     if (DQuestFrame and DQuestFrame:IsVisible()) then
         if (DQuestFrameDetailPanel and DQuestFrameDetailPanel:IsVisible()) then
@@ -230,5 +235,37 @@ SlashCmdList["DIALOGUI"] = function(msg)
     end
     DEFAULT_CHAT_FRAME:AddMessage("DialogUI: " .. DialogUI_Theme:GetMode() .. " mode");
 end
+
+-- /dui is a popular alias and DragonUI claims it too (reported on issue #2). When two
+-- addons register the same command, ChatEdit_ParseText resolves it by walking
+-- SlashCmdList in pairs() order and caching the first match — so which addon answers is
+-- arbitrary and can differ between sessions. Rather than race for it, yield the alias to
+-- whoever else wants it once every addon has loaded; /dialogui is ours alone and always
+-- works. Keeps /dui when nothing else claims it.
+local slashGuard = CreateFrame("Frame");
+slashGuard:RegisterEvent("PLAYER_LOGIN");
+slashGuard:SetScript("OnEvent", function()
+    if (not SLASH_DIALOGUI2) then
+        return;
+    end
+    local want = string.upper(SLASH_DIALOGUI2);
+    for index in pairs(SlashCmdList) do
+        if (index ~= "DIALOGUI") then
+            local i = 1;
+            local cmd = getglobal("SLASH_" .. index .. i);
+            while (cmd) do
+                if (string.upper(cmd) == want) then
+                    SLASH_DIALOGUI2 = nil;
+                    if (hash_SlashCmdList) then
+                        hash_SlashCmdList[want] = nil;   -- drop a cached win from this session
+                    end
+                    return;
+                end
+                i = i + 1;
+                cmd = getglobal("SLASH_" .. index .. i);
+            end
+        end
+    end
+end);
 
 -- The in-game options panel (incl. the Dark mode checkbox) lives in settings.lua.
